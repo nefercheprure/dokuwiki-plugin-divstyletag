@@ -1,0 +1,7 @@
+base   divstyletag
+author nefercheprure
+email  nefercheprure <hidden@>
+date   2012-06-01
+name   divstyletag plugin
+desc   <div style=""> element for wikis with disabled htmlok
+url    http://localhost/
