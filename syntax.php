@@ -57,12 +57,17 @@ class syntax_plugin_divstyletag extends DokuWiki_Syntax_Plugin {
 
 	public function connectTo($mode) {
 		//FIXME: add pseudoheaders
-		$this->Lexer->addSpecialPattern( '[ \t]*={2,}[^\n]+={2,}[ \t]*(?=\n)',$mode,'plugin_divstyletag');
+		//if ($mode == substr(get_class($this), 7)) {
+		//	$this->Lexer->addSpecialPattern( '[ \t]*={2,}[^\n]+={2,}[ \t]*(?=\n)',$mode,'plugin_divstyletag');
+		//}
 		$this->Lexer->addEntryPattern('<div(?:(?: +style="(?:[^"<>]*)")?(?: +class="(?:[^"<>]*)")?)>(?=.*?</div>)',$mode,'plugin_divstyletag');
+
+		//echo $mode . DOKU_LF;
 	}
 
 	public function postConnect() {
 		$this->Lexer->addExitPattern('</div>','plugin_divstyletag');
+		$this->Lexer->addPattern( '[ \t]*={2,}[^\n]+={2,}[ \t]*(?=\n)','plugin_divstyletag');
 	}
 
 	public function handle($match, $state, $pos, &$handler) {
@@ -100,6 +105,16 @@ class syntax_plugin_divstyletag extends DokuWiki_Syntax_Plugin {
 	public function render($mode, &$renderer, $data) {
 		if ($mode == 'xhtml') {
 			list($state, $val) = $data;
+
+			/* //DEBUG
+			ob_start();
+			echo 'THIS foobar'.DOKU_LF;
+			var_dump($this);
+			$y = ob_get_clean();
+			$renderer->doc.='<pre>'.
+			$renderer->_xmlEntities($y)
+			.'</pre>'; // */
+
 			switch ($state) {
 			case DOKU_LEXER_ENTER:
 				$renderer->doc .= $val;
