@@ -77,6 +77,8 @@ class syntax_plugin_divstyletag extends DokuWiki_Syntax_Plugin {
 			if ($this->_isValid($match)) {
 				$val = $match;
 			}
+			// set up this div section indicator
+			$handler->status['plugin_divstyletag__section'][] = false;
 			return array($state, $val);
 		case DOKU_LEXER_MATCHED:
 			/*
@@ -91,12 +93,28 @@ class syntax_plugin_divstyletag extends DokuWiki_Syntax_Plugin {
 			if($level < 1) $level = 1;
 			$title = trim($title,'=');
 			$title = trim($title);
-			return array($state, array($title, $level, $pos));
+
+			$plugin_name = substr(get_class($this), 14);
+			$args = array($state, array($title, $level, $pos));
+			$divstyletag_level = $handler->status['plugin_divstyletag__section'];
+			if (end($handler->status['plugin_divstyletag__section'])) {
+				$handler->_addCall('section_close',array(),$pos);
+			} else {
+				// set the last element (is there a better way?)
+				// because we are now in a section
+				array_pop($handler->status['plugin_divstyletag__section']);
+				$handler->status['plugin_divstyletag__section'][] = true;
+			}
+			$handler->addPluginCall($plugin_name, $args, $state, $pos, $match);
+			$handler->_addCall('section_open',array($level),$pos);
+			return false;
 		case DOKU_LEXER_UNMATCHED:
 			$handler->_addCall('cdata', array($match), $pos);
 			return false; 
 			//return array($state,$match);
 		case DOKU_LEXER_EXIT:
+			// clean up this div section indicator
+			array_pop($handler->status['plugin_divstyletag__section']);
 			return array($state, '');
 		}
 		return false;//array();
